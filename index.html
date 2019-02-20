@@ -1,0 +1,211 @@
+<html>
+    <head>
+        <title>EHRE oder MGN?</title>
+        <meta charset="utf-8">
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta
+            name="description"
+            content="Hi, I am Marius Niveri, a German based Web Developer. I love building intuitive user experiences on the web, creating deep neural networks and solving all kinds of problems in general.">
+        <meta
+            name="keywords"
+            content="Marius,Niveri,Web,Developer,Coder,Programmer,About,Portfolio">
+        <meta
+            name="author"
+            content="Marius Niveri">
+        <meta
+            name="mobile-web-app-capable"
+            content="yes">
+        <meta
+            name="theme-color"
+            content="#fff">
+        <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="white">
+    </head>
+    <body>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            html, body {
+                background: #000;
+                color: #fff;
+                font-family: "Helvetica Neue", Helvetica, "Roboto", Arial, sans-serif;
+                font-weight: 100;
+                text-align: center;
+                margin: 0;
+            }
+            body {
+                padding: 0 0 56px 0;
+                overflow: hidden;
+            }
+            video {
+                position: absolute;
+                height: calc(100vh - 56px);
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            button {
+                position: fixed;
+                appearance: none;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                padding: 4px;
+                height: 56px;
+                width: 100vw;
+                border: none;
+                background: #fff;
+                line-height: 48px;
+                margin: 0;
+                font-size: 24px;
+                cursor: pointer;
+                font-weight: 100;
+            }
+            #result {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #000;
+                color: #fff;
+                z-index: 100;
+                text-align: center;
+            }
+
+            #result-text {
+                font-size: 64px;
+                line-height: 60vh;
+                margin: 0;
+                padding: 0;
+                font-weight: 100;
+            }
+
+            button:active, button:focus {
+                background: #bfbfbf;
+            }
+        </style>
+
+        <main>
+
+                <div id="result">
+                    <h1 id="result-text">...</h1>
+                </div>
+
+                <div class="camera">
+                    <video id="video">Video stream not available.</video>
+                    <button id="startbutton">EHRE oder MGN?</button>
+                </div>
+
+                <canvas id="canvas"></canvas>
+
+                <div class="output">
+                    <img id="photo">
+                </div>
+
+        </main>
+    </body>
+
+    <script>
+
+        var width = 320;    // We will scale the photo width to this
+        var height = 0;     // This will be computed based on the input stream
+
+        var streaming = false;
+
+        var video = null;
+        var canvas = null;
+        var photo = null;
+        var startbutton = null;
+
+        function startup() {
+            video = document.getElementById('video');
+            canvas = document.getElementById('canvas');
+            photo = document.getElementById('photo');
+            startbutton = document.getElementById('startbutton');
+        }
+
+        startup()
+
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function(err) {
+                alert("OOPSIE DOOPSIE")
+                console.error("An error occurred! " + err);
+            });
+        
+        video.addEventListener('canplay', function(ev){
+            if (!streaming) {
+                height = video.videoHeight / (video.videoWidth/width);
+                streaming = true;
+            }
+            }, false);
+        
+        startbutton.addEventListener('click', function(ev){
+                takepicture();
+                ev.preventDefault();
+            }, false);
+        
+        document.getElementById('result').addEventListener("click", e => {
+            clearphoto()
+        })
+        
+        function clearphoto() {
+            var context = canvas.getContext('2d');
+            context.fillStyle = "#AAA";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            var data = canvas.toDataURL('image/jpeg');
+            photo.setAttribute('src', data);
+            document.getElementById('result').style.display = "none"
+        }
+
+        function takepicture() {
+            var context = canvas.getContext('2d');
+            if (width && height) {
+                canvas.width = width;
+                canvas.height = height;
+                context.drawImage(video, 0, 0, width, height);
+                var data = canvas.toDataURL('image/jpeg');
+                photo.setAttribute('src', data);
+                console.log(data)
+                document.getElementById('result').style.display = "block"
+
+                fetch('/ehre-oder-mgn/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': '*',
+                            'Content-Type': 'image/jpeg'
+                        },
+                        body: data.split(",")[1]
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        let coca = parseFloat(data.coca)
+                        let fritz = parseFloat(data.fritz)
+
+                        console.log("Coca: ", coca)
+                        console.log("Fritze: ", fritz)
+
+                        if (fritz > 0.75) {
+                            document.getElementById("result-text").textContent = "EHRE"
+                        } else {
+                            document.getElementById("result-text").textContent = "MGN!"
+                        }
+                    })
+
+            } else {
+                clearphoto();
+            }
+        }
+
+    </script>
+</html>
