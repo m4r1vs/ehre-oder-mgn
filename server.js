@@ -4,7 +4,7 @@ const fs = require('fs')
 const spawn = require("child_process").spawn;
 
 http.createServer(function (req, res) {
-  if (req.url == '/fileupload') {
+  if (req.url == '/ehre-oder-mgn/fileupload') {
     const form = new formidable.IncomingForm()
     form.parse(req, function (err, fields, files) {
       const oldpath = files.filetoupload.path
@@ -18,15 +18,23 @@ http.createServer(function (req, res) {
         fs.writeFile(newpath, data, function (err) {
             if (err) throw err
             console.log('File written!')
-            const pythonProcess = spawn('python',[__dirname + '/label_image.py']);
+            const pythonProcess = spawn('python3.6',[__dirname + '/label_image.py']);
             pythonProcess.stdout.on('data', (data) => {
-                console.log(data)
+		if (data.toString().split("|")[0] === "TONODE") {
+			console.log("YEAS")
+			res.write('data: ' + data)
+			res.end()
+		}
+                console.log('data: ' + data)
             });
+	    pythonProcess.stderr.on('data', error => console.error('error: ' + error))
             pythonProcess.on('close', code => {
                 console.log("closed", code)
-            })
-            res.write('File uploaded and moved!')
-            res.end()
+		if (code !== 0) {
+			res.write("error")
+			res.end()
+            	}
+	    })
         })
 
         // Delete the file
@@ -38,10 +46,10 @@ http.createServer(function (req, res) {
  })
   } else {
     res.writeHead(200, {'Content-Type': 'text/html'})
-    res.write('<form action="fileupload" method="post" enctype="multipart/form-data">')
+    res.write('<form action="/ehre-oder-mgn/fileupload" method="post" enctype="multipart/form-data">')
     res.write('<input type="file" name="filetoupload"><br>')
     res.write('<input type="submit">')
     res.write('</form>')
     return res.end()
   }
-}).listen(8080)
+}).listen(8888)

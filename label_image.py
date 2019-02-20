@@ -61,7 +61,7 @@ if __name__ == "__main__":
   input_layer = "Mul"
   output_layer = "final_result"
 
-  file_name = "img.jpg"
+  file_name = "image.jpg"
 
   graph = load_graph(model_file)
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
   top_k = results.argsort()[-5:][::-1]
   labels = load_labels(label_file)
 
-  print('\nEvaluation time: {:.3f}s\n'.format(end-start))
+  print("TONODE|")
   template = "{} (score={:0.5f})"
   for i in top_k:
     print(template.format(labels[i], results[i]))
