@@ -7,6 +7,8 @@ import base64
 import numpy as np
 import tensorflow as tf
 
+PATH = os.path.realpath(__file__)
+
 def load_graph(model_file):
     graph = tf.Graph()
     graph_def = tf.GraphDef()
@@ -37,8 +39,8 @@ def load_labels(label_file):
         label.append(l.rstrip())
     return label
 
-model_file = "graph.pb"
-label_file = "labels.txt"
+model_file = "{}/graph.pb".format(PATH)
+label_file = "{}/labels.txt".format(PATH)
 
 input_height = 299
 input_width = 299
@@ -51,7 +53,7 @@ graph = load_graph(model_file)
 
 @route('/ehre-oder-mgn/')
 def root():
-    return static_file('index.html', root='.')
+    return static_file('{}/index.html'.format(PATH), root='/')
 
 @route('/ehre-oder-mgn/upload', method='POST')
 def do_upload():
