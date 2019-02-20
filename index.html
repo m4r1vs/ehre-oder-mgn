@@ -196,10 +196,10 @@
                         console.log("Coca: ", coca)
                         console.log("Fritze: ", fritz)
 
-                        if (fritz > 0.75) {
-                            document.getElementById("result-text").textContent = "EHRE"
+                        if (fritz > 0.5) {
+                            document.getElementById("result-text").textContent = `${fritz * 100}% EHRE`
                         } else {
-                            document.getElementById("result-text").textContent = "MGN!"
+                            document.getElementById("result-text").textContent = `${coca * 100}% MGN`
                         }
                     })
 
