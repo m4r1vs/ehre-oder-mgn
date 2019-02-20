@@ -7,7 +7,7 @@ import base64
 import numpy as np
 import tensorflow as tf
 
-PATH = os.path.realpath(__file__)
+PATH = os.path.dirname(os.path.realpath(__file__))
 
 def load_graph(model_file):
     graph = tf.Graph()
