@@ -57,6 +57,10 @@ graph = load_graph(model_file)
 def root():
     return static_file('{}/index.html'.format(PATH), root='/')
 
+@route('/ehre-oder-mgn/index.js')
+def serve_js():
+    return static_file('{}/index.js'.format(PATH), root='/')
+
 @route('/ehre-oder-mgn/upload', method='POST')
 def do_upload():
 
