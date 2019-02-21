@@ -15,6 +15,7 @@ def load_graph(model_file):
 
     with open(model_file, "rb") as f:
         graph_def.ParseFromString(f.read())
+    
     with graph.as_default():
         tf.import_graph_def(graph_def)
 
@@ -22,8 +23,9 @@ def load_graph(model_file):
 
 def read_tensor_from_image_file(file_base64, input_height=299, input_width=299, input_mean=0, input_std=255):
     file_decoded = base64.b64decode(file_base64)
-    image_reader = tf.image.decode_image(file_decoded, channels = 3, name='jpeg_reader')
-    float_caster = tf.cast(image_reader, tf.float32)
+    image_reader = tf.image.decode_jpeg(file_decoded, channels = 1, name='jpeg_reader')
+    resized_image = tf.image.resize_images(image_reader, (128, 128))
+    float_caster = tf.cast(resized_image, tf.float32)
     dims_expander = tf.expand_dims(float_caster, 0)
     resized = tf.image.resize_bilinear(dims_expander, [input_height, input_width])
     normalized = tf.divide(tf.subtract(resized, [input_mean]), [input_std])
